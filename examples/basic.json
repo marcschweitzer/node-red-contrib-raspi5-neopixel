@@ -1,0 +1,231 @@
+[
+  {
+    "id": "neopixel_demo",
+    "type": "tab",
+    "label": "raspi5-neopixel demo",
+    "disabled": false,
+    "info": ""
+  },
+  {
+    "id": "inj0",
+    "type": "inject",
+    "z": "neopixel_demo",
+    "name": "test",
+    "props": [
+      {
+        "p": "payload"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "test",
+    "payloadType": "str",
+    "x": 150,
+    "y": 60,
+    "wires": [
+      [
+        "np1"
+      ]
+    ]
+  },
+  {
+    "id": "inj1",
+    "type": "inject",
+    "z": "neopixel_demo",
+    "name": "red",
+    "props": [
+      {
+        "p": "payload"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "red",
+    "payloadType": "str",
+    "x": 150,
+    "y": 100,
+    "wires": [
+      [
+        "np1"
+      ]
+    ]
+  },
+  {
+    "id": "inj2",
+    "type": "inject",
+    "z": "neopixel_demo",
+    "name": "green (hex)",
+    "props": [
+      {
+        "p": "payload"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "#00FF00",
+    "payloadType": "str",
+    "x": 150,
+    "y": 140,
+    "wires": [
+      [
+        "np1"
+      ]
+    ]
+  },
+  {
+    "id": "inj3",
+    "type": "inject",
+    "z": "neopixel_demo",
+    "name": "off",
+    "props": [
+      {
+        "p": "payload"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "off",
+    "payloadType": "str",
+    "x": 150,
+    "y": 180,
+    "wires": [
+      [
+        "np1"
+      ]
+    ]
+  },
+  {
+    "id": "inj4",
+    "type": "inject",
+    "z": "neopixel_demo",
+    "name": "rainbow",
+    "props": [
+      {
+        "p": "payload"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "rainbow",
+    "payloadType": "str",
+    "x": 150,
+    "y": 220,
+    "wires": [
+      [
+        "np1"
+      ]
+    ]
+  },
+  {
+    "id": "inj5",
+    "type": "inject",
+    "z": "neopixel_demo",
+    "name": "pulse",
+    "props": [
+      {
+        "p": "payload"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "pulse",
+    "payloadType": "str",
+    "x": 150,
+    "y": 260,
+    "wires": [
+      [
+        "np1"
+      ]
+    ]
+  },
+  {
+    "id": "inj_b",
+    "type": "inject",
+    "z": "neopixel_demo",
+    "name": "brightness 20%",
+    "props": [
+      {
+        "p": "brightness",
+        "v": "20",
+        "vt": "num"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "x": 160,
+    "y": 300,
+    "wires": [
+      [
+        "np1"
+      ]
+    ]
+  },
+  {
+    "id": "inj_px",
+    "type": "inject",
+    "z": "neopixel_demo",
+    "name": "pixel 4 = blue",
+    "props": [
+      {
+        "p": "payload"
+      },
+      {
+        "p": "pixel",
+        "v": "4",
+        "vt": "num"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "blue",
+    "payloadType": "str",
+    "x": 160,
+    "y": 340,
+    "wires": [
+      [
+        "np1"
+      ]
+    ]
+  },
+  {
+    "id": "np1",
+    "type": "raspi5-neopixel",
+    "z": "neopixel_demo",
+    "name": "",
+    "bus": "0",
+    "dev": "0",
+    "speedHz": "6400000",
+    "numLeds": "10",
+    "colorOrder": "GRB",
+    "brightness": "100",
+    "gamma": false,
+    "offOnClose": true,
+    "x": 440,
+    "y": 200,
+    "wires": []
+  }
+]

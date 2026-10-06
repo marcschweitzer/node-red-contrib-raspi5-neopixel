@@ -1,0 +1,170 @@
+<!-- node-red-contrib-raspi5-neopixel/neopixel.html -->
+
+<script type="text/x-red" data-template-name="raspi5-neopixel">
+  <div class="form-row">
+    <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="raspi5-neopixel">
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-bus"><i class="fa fa-random"></i> SPI Bus</label>
+    <select id="node-input-bus">
+      <option value="0">SPI0 (bus 0)</option>
+      <option value="1">SPI1 (bus 1)</option>
+    </select>
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-dev"><i class="fa fa-bullseye"></i> Device (CS)</label>
+    <input type="number" id="node-input-dev" min="0" max="2">
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-speedHz"><i class="fa fa-tachometer"></i> SPI speed (Hz)</label>
+    <input type="number" id="node-input-speedHz" min="1000000" step="100000">
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-numLeds"><i class="fa fa-lightbulb-o"></i> Number of LEDs</label>
+    <input type="number" id="node-input-numLeds" min="1" max="2700">
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-colorOrder"><i class="fa fa-exchange"></i> Color order</label>
+    <select id="node-input-colorOrder">
+      <option value="GRB">GRB (most WS2812 / WS2812B)</option>
+      <option value="RGB">RGB (e.g. WS2811, some PL9823)</option>
+      <option value="BRG">BRG</option>
+      <option value="BGR">BGR</option>
+      <option value="RBG">RBG</option>
+      <option value="GBR">GBR</option>
+    </select>
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-brightness"><i class="fa fa-sun-o"></i> Brightness (%)</label>
+    <input type="number" id="node-input-brightness" min="0" max="100" step="1">
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-gamma"><i class="fa fa-line-chart"></i> Gamma</label>
+    <input type="checkbox" id="node-input-gamma" style="width:auto;">
+    <span style="margin-left:10px;">(gamma 2.2 correction for smoother fades)</span>
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-offOnClose"><i class="fa fa-power-off"></i> Off on close</label>
+    <input type="checkbox" id="node-input-offOnClose" style="width:auto;">
+    <span style="margin-left:10px;">(turn all LEDs off on deploy / stop)</span>
+  </div>
+
+  <hr>
+
+  <div class="form-row">
+    <label><i class="fa fa-plug"></i> Wiring</label>
+    <div id="neopixel-pins" style="padding:8px; border:1px solid #ddd; border-radius:6px; background:#fafafa;"></div>
+  </div>
+
+  <div class="form-tips">
+    <b>Input:</b> <code>msg.payload</code> = color (<code>"red"</code>, <code>"#FF0000"</code>, <code>[255,0,0]</code>, <code>{r,g,b}</code>),
+    array of colors (one per LED), <code>"off"</code>, <code>"test"</code> or an effect
+    (<code>rainbow</code>, <code>colorcycle</code>, <code>lava</code>, <code>blink</code>, <code>pulse</code>, <code>sparkle</code>, <code>chase</code>).<br>
+    Optional: <code>msg.brightness</code> (0-100), <code>msg.pixel</code>, <code>msg.start</code> + <code>msg.count</code>, <code>msg.color</code>, <code>msg.interval</code>.<br>
+    <b>Wrong colors?</b> Send <code>"test"</code>: LED 0 must be red, LED 1 green, LED 2 blue. If red/green are swapped, switch RGB &harr; GRB.
+  </div>
+</script>
+
+<script type="text/x-red" data-help-name="raspi5-neopixel">
+  <p>WS2812 / NeoPixel LED strip node for Raspberry Pi 5 (pure JS via <code>spi-device</code>). Only the SPI <b>MOSI</b> pin is used as data line.</p>
+
+  <h3>Configuration</h3>
+  <ul>
+    <li><b>SPI Bus / Device</b>: opens <code>/dev/spidev&lt;bus&gt;.&lt;device&gt;</code></li>
+    <li><b>SPI speed</b>: default 6400000 Hz (1 LED bit = 8 SPI bits)</li>
+    <li><b>Color order</b>: byte order the LED chip expects. GRB for most WS2812, RGB for some other models.</li>
+    <li><b>Brightness</b>: global scaling 0-100 %</li>
+  </ul>
+
+  <h3>Inputs</h3>
+  <pre>
+"red"                       fill strip (CSS color name)
+"#FF8000" / "#F80"          fill strip (hex)
+"255,128,0" / [255,128,0]   fill strip (rgb)
+{ "r":255, "g":128, "b":0 } fill strip (object)
+[ "red", [0,255,0], "#00F" ] one color per LED, rest off
+"off"                       all LEDs off
+"test"                      LED0 red, LED1 green, LED2 blue
+"rainbow"                   effect (see below)
+  </pre>
+
+  <h3>Overrides</h3>
+  <ul>
+    <li><code>msg.pixel</code>: set only this LED (index from 0)</li>
+    <li><code>msg.start</code> + <code>msg.count</code>: set only this range</li>
+    <li><code>msg.brightness</code>: 0-100 %, stays active (can be sent alone)</li>
+    <li><code>msg.color</code>: color for <code>blink</code>, <code>pulse</code>, <code>sparkle</code>, <code>chase</code></li>
+    <li><code>msg.interval</code>: effect frame time in ms</li>
+  </ul>
+
+  <h3>Effects</h3>
+  <p><code>rainbow</code>, <code>colorcycle</code>, <code>lava</code>, <code>blink</code>, <code>pulse</code>, <code>sparkle</code>, <code>chase</code>. An effect runs until the next message.</p>
+
+  <h3>Safety</h3>
+  <p>Never power more than a few LEDs from the Pi 5V pin. Use an external 5V supply and a common GND. Max ~60 mA per LED at full white.</p>
+</script>
+
+<script type="text/javascript">
+(function() {
+  function pinsFor(bus, dev) {
+    bus = String(bus);
+    dev = String(dev);
+    if (bus === "0") {
+      return `
+<b>SPI0 (Bus 0) &rarr; /dev/spidev0.${dev}</b><br>
+MOSI: GPIO10 (Pin 19) &rarr; LED DIN<br>
+GND: Pin 6 &rarr; LED GND (common with LED power supply)<br>
+5V: external power supply &rarr; LED 5V/VCC<br>
+<i>SCK GPIO11 and CE${dev} toggle too: do not use them for other things.</i>
+`;
+    }
+    return `
+<b>SPI1 (Bus 1) &rarr; /dev/spidev1.${dev}</b> (needs <code>dtoverlay=spi1-1cs</code> or <code>spi1-3cs</code>)<br>
+MOSI: GPIO20 (Pin 38) &rarr; LED DIN<br>
+GND: Pin 39 &rarr; LED GND (common with LED power supply)<br>
+5V: external power supply &rarr; LED 5V/VCC<br>
+<i>SCK GPIO21 and CE pins toggle too: do not use them for other things.</i>
+`;
+  }
+
+  function updatePins() {
+    var bus = $("#node-input-bus").val();
+    var dev = $("#node-input-dev").val();
+    $("#neopixel-pins").html(pinsFor(bus, dev));
+  }
+
+  RED.nodes.registerType('raspi5-neopixel', {
+    category: 'raspi5',
+    color: '#c7e9c0',
+    defaults: {
+      name: {value:""},
+      bus: {value:"0", required:true},
+      dev: {value:"0", required:true},
+      speedHz: {value:"6400000", required:true},
+      numLeds: {value:"10", required:true, validate: RED.validators.number()},
+      colorOrder: {value:"GRB", required:true},
+      brightness: {value:"100"},
+      gamma: {value:false},
+      offOnClose: {value:true}
+    },
+    inputs: 1,
+    outputs: 0,
+    icon: "font-awesome/fa-lightbulb-o",
+    label: function() { return this.name || "raspi5-neopixel"; },
+    oneditprepare: function() {
+      updatePins();
+      $("#node-input-bus").on("change", updatePins);
+      $("#node-input-dev").on("change", updatePins);
+    }
+  });
+})();
+</script>
